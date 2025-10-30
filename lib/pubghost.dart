@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:yaml/yaml.dart';
 
+/// Scans `pubspec.yaml` dependencies vs `lib/` imports to report unused packages.
 Future<void> checkUnusedDependencies() async {
   final projectDir = Directory.current;
 
@@ -52,6 +53,7 @@ Future<void> checkUnusedDependencies() async {
   }
 }
 
+/// Scans your project’s `lib/` for class declarations and reports classes never referenced elsewhere.
 Future<void> checkUnusedWidgets() async {
   final projectDir = Directory.current;
 
@@ -128,6 +130,7 @@ Future<void> checkUnusedWidgets() async {
   }
 }
 
+/// Scans keys from `.arb` files and reports keys not referenced in code via common l10n access patterns (e.g., `S.of(context).keyName`, `AppLocalizations.current.keyName`, `context.l10n.keyName`).
 Future<void> checkUnusedIntlKeys() async {
   final projectDir = Directory.current;
 
