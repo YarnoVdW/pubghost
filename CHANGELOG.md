@@ -1,3 +1,6 @@
+## 1.0.3
+- Updated pub description.
+
 ## 1.0.2
 - Added scanning for unused tranlations.
 - Updated README.md.
