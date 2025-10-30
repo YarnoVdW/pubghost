@@ -12,7 +12,10 @@ Future<void> checkUnusedDependencies() async {
   }
 
   final yaml = loadYaml(pubspecFile.readAsStringSync());
-  final deps = <String>[...?yaml['dependencies']?.keys, ...?yaml['dev_dependencies']?.keys];
+  final deps = <String>[
+    ...?yaml['dependencies']?.keys,
+    ...?yaml['dev_dependencies']?.keys,
+  ];
 
   if (deps.isEmpty) {
     print('No dependencies found in pubspec.yaml.');
@@ -52,9 +55,11 @@ Future<void> checkUnusedDependencies() async {
 Future<void> checkUnusedWidgets() async {
   final projectDir = Directory.current;
 
-  final dartFiles = Directory(
-    '${projectDir.path}/lib',
-  ).listSync(recursive: true).whereType<File>().where((f) => f.path.endsWith('.dart')).toList();
+  final dartFiles = Directory('${projectDir.path}/lib')
+      .listSync(recursive: true)
+      .whereType<File>()
+      .where((f) => f.path.endsWith('.dart'))
+      .toList();
 
   final definedClasses = <String, String>{};
   final allContent = <String, String>{};
@@ -83,7 +88,10 @@ Future<void> checkUnusedWidgets() async {
 
   for (final className in definedClasses.keys) {
     final classDefinitionPattern = RegExp(r'class\s+' + className + r'\b');
-    final contentWithoutDefinition = combinedContent.replaceAll(classDefinitionPattern, '');
+    final contentWithoutDefinition = combinedContent.replaceAll(
+      classDefinitionPattern,
+      '',
+    );
 
     final patterns = [
       RegExp('\\b$className\\b'),
@@ -102,7 +110,9 @@ Future<void> checkUnusedWidgets() async {
     }
   }
 
-  final unusedClasses = definedClasses.keys.where((className) => !usedClasses.contains(className)).toList();
+  final unusedClasses = definedClasses.keys
+      .where((className) => !usedClasses.contains(className))
+      .toList();
 
   if (unusedClasses.isEmpty) {
     print('✅ All classes are used.');
@@ -110,7 +120,9 @@ Future<void> checkUnusedWidgets() async {
     print('⚠️  Unused classes (${unusedClasses.length}):');
     for (final className in unusedClasses) {
       final filePath = definedClasses[className]!;
-      final relativePath = filePath.replaceFirst(projectDir.path, '').replaceFirst('/', '');
+      final relativePath = filePath
+          .replaceFirst(projectDir.path, '')
+          .replaceFirst('/', '');
       print(' - $className ($relativePath)');
     }
   }
@@ -134,7 +146,8 @@ Future<void> checkUnusedIntlKeys() async {
   for (final file in arbFiles) {
     try {
       final content = await file.readAsString();
-      final Map<String, dynamic> data = jsonDecode(content) as Map<String, dynamic>;
+      final Map<String, dynamic> data =
+          jsonDecode(content) as Map<String, dynamic>;
       for (final key in data.keys) {
         if (!key.startsWith('@')) {
           allKeys.add(key);
@@ -148,17 +161,20 @@ Future<void> checkUnusedIntlKeys() async {
     return;
   }
 
-  final dartFiles = projectDir.listSync(recursive: true).whereType<File>().where((f) => f.path.endsWith('.dart')).where(
-    (f) {
-      final p = f.path;
-      if (p.contains('/test/')) return false;
-      if (p.contains('/.dart_tool/')) return false;
-      if (p.contains('/build/')) return false;
-      if (p.contains('/gen_l10n/')) return false;
-      if (p.contains('/l10n/generated/')) return false;
-      return true;
-    },
-  ).toList();
+  final dartFiles = projectDir
+      .listSync(recursive: true)
+      .whereType<File>()
+      .where((f) => f.path.endsWith('.dart'))
+      .where((f) {
+        final p = f.path;
+        if (p.contains('/test/')) return false;
+        if (p.contains('/.dart_tool/')) return false;
+        if (p.contains('/build/')) return false;
+        if (p.contains('/gen_l10n/')) return false;
+        if (p.contains('/l10n/generated/')) return false;
+        return true;
+      })
+      .toList();
 
   if (dartFiles.isEmpty) {
     print('No Dart files to scan for intl usage.');
