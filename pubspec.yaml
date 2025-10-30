@@ -1,6 +1,8 @@
 name: pubghost
 description: A sample CLI tool to find unused packages in a Flutter project.
 version: 1.0.2
+repository: https://github.com/YarnoVdW/pubghost
+homepage: https://github.com/YarnoVdW/pubghost
 
 environment:
   sdk: ^3.9.2
