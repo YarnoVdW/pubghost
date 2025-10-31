@@ -1,3 +1,6 @@
+## 1.0.5
+- Fixed a small issue where scanner was also finding translations from dependencies.
+
 ## 1.0.4
 - Lowered min sdk to >3.0.0 < 4.0.0
 

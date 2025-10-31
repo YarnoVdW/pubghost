@@ -122,9 +122,8 @@ Future<void> checkUnusedWidgets() async {
     print('⚠️  Unused classes (${unusedClasses.length}):');
     for (final className in unusedClasses) {
       final filePath = definedClasses[className]!;
-      final relativePath = filePath
-          .replaceFirst(projectDir.path, '')
-          .replaceFirst('/', '');
+      final relativePath =
+          filePath.replaceFirst(projectDir.path, '').replaceFirst('/', '');
       print(' - $className ($relativePath)');
     }
   }
@@ -134,7 +133,7 @@ Future<void> checkUnusedWidgets() async {
 Future<void> checkUnusedIntlKeys() async {
   final projectDir = Directory.current;
 
-  final arbFiles = projectDir
+  final arbFiles = Directory('${projectDir.path}/lib')
       .listSync(recursive: true)
       .whereType<File>()
       .where((f) => f.path.endsWith('.arb'))
@@ -169,15 +168,14 @@ Future<void> checkUnusedIntlKeys() async {
       .whereType<File>()
       .where((f) => f.path.endsWith('.dart'))
       .where((f) {
-        final p = f.path;
-        if (p.contains('/test/')) return false;
-        if (p.contains('/.dart_tool/')) return false;
-        if (p.contains('/build/')) return false;
-        if (p.contains('/gen_l10n/')) return false;
-        if (p.contains('/l10n/generated/')) return false;
-        return true;
-      })
-      .toList();
+    final p = f.path;
+    if (p.contains('/test/')) return false;
+    if (p.contains('/.dart_tool/')) return false;
+    if (p.contains('/build/')) return false;
+    if (p.contains('/gen_l10n/')) return false;
+    if (p.contains('/l10n/generated/')) return false;
+    return true;
+  }).toList();
 
   if (dartFiles.isEmpty) {
     print('No Dart files to scan for intl usage.');
