@@ -1,5 +1,5 @@
 ## 1.0.4
-- Lowered min sdk to >3.0.0
+- Lowered min sdk to >3.0.0 < 4.0.0
 
 ## 1.0.3
 - Updated pub description.
