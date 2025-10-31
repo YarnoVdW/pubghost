@@ -1,3 +1,6 @@
+## 1.0.6
+- Added the ability to ignore certain dependencies
+
 ## 1.0.5
 - Fixed a small issue where scanner was also finding translations from dependencies.
 

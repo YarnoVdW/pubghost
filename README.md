@@ -19,7 +19,7 @@ Add as a dev dependency:
 
 ```yaml
 dev_dependencies:
-  pubghost: ^1.0.5
+  pubghost: ^1.0.6
 ```
 
 Then get packages:
