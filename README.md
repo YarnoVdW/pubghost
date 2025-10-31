@@ -55,6 +55,7 @@ pubghost --intl
 ### Commands
 
 - `--deps`: Check for unused dependencies declared in `pubspec.yaml`.
+> See [Configuration and Conventions](#configuration-and-conventions) to ignore specific dependencies.
 - `--widgets`: Check for unused classes/widgets under your project `lib/` directory.
 - `--intl`: Check for `.arb` keys not referenced in your code. Generated l10n directories are excluded.
 
@@ -87,6 +88,13 @@ pubghost --intl
   - `AppLocalizations.of(context).myKey`
   - `AppLocalizations.current.myKey`
   - `context.l10n.myKey`
+- Supports the exclusion of specific dependencies by adding a `pubghost` section in `pubspec.yaml`:
+> ```yaml
+> pubghost:
+>   ignore_dependencies:
+>     - flutter_launcher_icons
+> ```
+
 
 ## Limitations
 
@@ -94,7 +102,6 @@ pubghost --intl
   - Dynamically constructed imports/usages
   - Reflection or code generation outside the excluded folders
   - Intl keys used through non-standard access patterns
-- For `--deps`, only direct `package:` imports are considered usage. Transitive or runtime-only usages aren’t detected.
 
 ## CI
 

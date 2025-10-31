@@ -2,6 +2,8 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:yaml/yaml.dart';
 
+const packageName = 'pubghost';
+
 /// Scans `pubspec.yaml` dependencies vs `lib/` imports to report unused packages.
 Future<void> checkUnusedDependencies() async {
   final projectDir = Directory.current;
@@ -21,6 +23,19 @@ Future<void> checkUnusedDependencies() async {
   if (deps.isEmpty) {
     print('No dependencies found in pubspec.yaml.');
     exit(0);
+  }
+
+  final ignoredDeps = yaml[packageName]?['ignore_dependencies'];
+
+  // Remove any ignored dependencies as defined in the users `pubspec.yaml`
+  if (ignoredDeps is YamlList) {
+    for (final ignored in ignoredDeps) {
+      if (ignored is String) {
+        deps.remove(ignored);
+      }
+    }
+    // Remove our package by default
+    deps.remove(packageName);
   }
 
   final dartFiles = projectDir
