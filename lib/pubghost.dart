@@ -27,14 +27,12 @@ Future<bool> checkUnusedDependencies() async {
 
   final ignoredDeps = yaml[packageName]?['ignore_dependencies'];
 
-  // Remove any ignored dependencies as defined in the users `pubspec.yaml`
   if (ignoredDeps is YamlList) {
     for (final ignored in ignoredDeps) {
       if (ignored is String) {
         deps.remove(ignored);
       }
     }
-    // Remove our package by default
     deps.remove(packageName);
   }
 
@@ -70,6 +68,35 @@ Future<bool> checkUnusedDependencies() async {
 /// Scans your project’s `lib/` for class declarations and reports classes never referenced elsewhere.
 Future<bool> checkUnusedWidgets() async {
   final projectDir = Directory.current;
+  final pubspecFile = File('${projectDir.path}/pubspec.yaml');
+  final ignoredExactClasses = <String>{};
+  final ignoredPatterns = <RegExp>[];
+
+  if (!pubspecFile.existsSync()) {
+    print('No pubspec.yaml found in current directory.');
+    return false;
+  }
+
+  if (pubspecFile.existsSync()) {
+    final yaml = loadYaml(pubspecFile.readAsStringSync());
+    final ignoredFromConfig = yaml[packageName]?['ignore_classes'];
+
+    if (ignoredFromConfig is YamlList) {
+      for (final ignored in ignoredFromConfig) {
+        if (ignored is String) {
+          if (_isRegexPattern(ignored)) {
+            try {
+              ignoredPatterns.add(RegExp(ignored));
+            } catch (e) {
+              ignoredExactClasses.add(ignored);
+            }
+          } else {
+            ignoredExactClasses.add(ignored);
+          }
+        }
+      }
+    }
+  }
 
   final dartFiles = Directory('${projectDir.path}/lib')
       .listSync(recursive: true)
@@ -126,7 +153,17 @@ Future<bool> checkUnusedWidgets() async {
     }
   }
 
-  final unusedClasses = definedClasses.keys.where((className) => !usedClasses.contains(className)).toList();
+  final unusedClasses = definedClasses.keys.where((className) {
+    if (usedClasses.contains(className)) return false;
+
+    if (ignoredExactClasses.contains(className)) return false;
+
+    for (final pattern in ignoredPatterns) {
+      if (pattern.hasMatch(className)) return false;
+    }
+
+    return true;
+  }).toList();
 
   if (unusedClasses.isEmpty) {
     print('✅ All classes are used.');
@@ -218,4 +255,10 @@ Future<bool> checkUnusedIntlKeys() async {
     }
     return false;
   }
+}
+
+/// Checks if a string looks like a regex pattern.
+bool _isRegexPattern(String s) {
+  final regexChars = ['.*', '^', r'$', '+', '*', '?', '|', '(', ')', '[', ']', '{', '}', '\\'];
+  return regexChars.any((char) => s.contains(char));
 }
