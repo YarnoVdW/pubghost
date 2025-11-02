@@ -1,3 +1,8 @@
+## 1.0.7
+- Added the ability to chain arguments.
+- Added pattern-based ignoring for classes via `ignore_classes` in `pubspec.yaml` (supports exact matches and regex patterns).
+- Updated args: (-d (--deps), -t (--intl), -c (--widgets)).
+
 ## 1.0.6
 - Added the ability to ignore certain dependencies
 

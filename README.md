@@ -9,9 +9,9 @@ Fast, lightweight CLI you can run locally or in CI.
 
 ## Features
 
-- **--deps**: Scans `lib/` imports to find dependencies declared in `pubspec.yaml` but never imported.
-- **--widgets**: Finds classes defined in your app and reports ones never referenced anywhere else.
-- **--intl**: Parses `.arb` files and reports keys not used in code via common localization access like `S.of(context).keyName`, `AppLocalizations.current.keyName`, or `context.l10n.keyName`. Generated l10n sources are ignored.
+- **-d**: (--deps) Scans `lib/` imports to find dependencies declared in `pubspec.yaml` but never imported.
+- **-c**: (--widgets) Finds classes defined in your app and reports ones never referenced anywhere else.
+- **-t**: (--intl) Parses `.arb` files and reports keys not used in code via common localization access like `S.of(context).keyName`, `AppLocalizations.current.keyName`, or `context.l10n.keyName`. Generated l10n sources are ignored.
 
 ## Installation
 
@@ -19,7 +19,7 @@ Add as a dev dependency:
 
 ```yaml
 dev_dependencies:
-  pubghost: ^1.0.6
+  pubghost: ^1.0.7
 ```
 
 Then get packages:
@@ -88,12 +88,18 @@ pubghost --intl
   - `AppLocalizations.of(context).myKey`
   - `AppLocalizations.current.myKey`
   - `context.l10n.myKey`
-- Supports the exclusion of specific dependencies by adding a `pubghost` section in `pubspec.yaml`:
+- Supports the exclusion of specific dependencies and classes by adding a `pubghost` section in `pubspec.yaml`:
 > ```yaml
 > pubghost:
 >   ignore_dependencies:
 >     - flutter_launcher_icons
+>   ignore_classes:
+>     - ExactClassName           # Exact class name match
+>     - ".*Model$"               # Regex pattern: classes ending in "Model"
+>     - "^MyPrefix.*"            # Regex pattern: classes starting with "MyPrefix"
 > ```
+
+
 
 
 ## Limitations
