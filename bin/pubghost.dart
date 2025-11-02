@@ -9,7 +9,7 @@ void main(List<String> arguments) async {
     print('  -c, --widgets   Check for unused classes/widgets');
     print('  -t, --intl      Check ARB intl keys not used in code');
     print('');
-    print('Flags can be chained: -dc, -cdi, etc.');
+    print('Flags can be chained: -dc, -cdt, etc.');
     exit(1);
   }
 
@@ -70,12 +70,12 @@ void main(List<String> arguments) async {
         print('  -c, --widgets   Check for unused classes/widgets');
         print('  -t, --intl      Check ARB intl keys not used in code');
         print('');
-        print('Flags can be chained: -dc, -cdi, etc.');
+        print('Flags can be chained: -dc, -cdt, etc.');
     }
 
     if (isDeprecated) {
       stderr.writeln(
-          '⚠️  Warning: $command is going to be deprecated in the future. Use ${command == "--deps" ? "-d" : command == "--widgets" ? "-c" : "-i"} instead.');
+          '⚠️  Warning: $command is going to be deprecated in the future. Use ${command == "--deps" ? "-d" : command == "--widgets" ? "-c" : "-t"} instead.');
     }
   }
 
@@ -86,7 +86,7 @@ void main(List<String> arguments) async {
     print('  -c, --widgets   Check for unused classes/widgets');
     print('  -t, --intl      Check ARB intl keys not used in code');
     print('');
-    print('Flags can be chained: -dc, -cdi, etc.');
+    print('Flags can be chained: -dc, -cdt, etc.');
     exit(1);
   }
 
