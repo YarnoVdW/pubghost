@@ -36,8 +36,11 @@ Future<bool> checkUnusedDependencies() async {
     deps.remove(packageName);
   }
 
-  final dartFiles =
-      projectDir.listSync(recursive: true).whereType<File>().where((f) => f.path.endsWith('.dart')).toList();
+  final dartFiles = projectDir
+      .listSync(recursive: true)
+      .whereType<File>()
+      .where((f) => f.path.endsWith('.dart'))
+      .toList();
 
   final usedPackages = <String>{};
 
@@ -172,7 +175,8 @@ Future<bool> checkUnusedWidgets() async {
     print('⚠️  Unused classes (${unusedClasses.length}):');
     for (final className in unusedClasses) {
       final filePath = definedClasses[className]!;
-      final relativePath = filePath.replaceFirst(projectDir.path, '').replaceFirst('/', '');
+      final relativePath =
+          filePath.replaceFirst(projectDir.path, '').replaceFirst('/', '');
       print(' - $className ($relativePath)');
     }
     return false;
@@ -198,7 +202,8 @@ Future<bool> checkUnusedIntlKeys() async {
   for (final file in arbFiles) {
     try {
       final content = await file.readAsString();
-      final Map<String, dynamic> data = jsonDecode(content) as Map<String, dynamic>;
+      final Map<String, dynamic> data =
+          jsonDecode(content) as Map<String, dynamic>;
       for (final key in data.keys) {
         if (!key.startsWith('@')) {
           allKeys.add(key);
@@ -212,8 +217,11 @@ Future<bool> checkUnusedIntlKeys() async {
     return true;
   }
 
-  final dartFiles =
-      projectDir.listSync(recursive: true).whereType<File>().where((f) => f.path.endsWith('.dart')).where((f) {
+  final dartFiles = projectDir
+      .listSync(recursive: true)
+      .whereType<File>()
+      .where((f) => f.path.endsWith('.dart'))
+      .where((f) {
     final p = f.path;
     if (p.contains('/test/')) return false;
     if (p.contains('/.dart_tool/')) return false;
@@ -259,6 +267,21 @@ Future<bool> checkUnusedIntlKeys() async {
 
 /// Checks if a string looks like a regex pattern.
 bool _isRegexPattern(String s) {
-  final regexChars = ['.*', '^', r'$', '+', '*', '?', '|', '(', ')', '[', ']', '{', '}', '\\'];
+  final regexChars = [
+    '.*',
+    '^',
+    r'$',
+    '+',
+    '*',
+    '?',
+    '|',
+    '(',
+    ')',
+    '[',
+    ']',
+    '{',
+    '}',
+    '\\'
+  ];
   return regexChars.any((char) => s.contains(char));
 }
