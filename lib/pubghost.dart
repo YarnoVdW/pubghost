@@ -34,11 +34,8 @@ Future<bool> checkUnusedDependencies() async {
   deps.removeWhere((dep) => ignored.contains(dep));
   devDeps.removeWhere((dep) => ignored.contains(dep));
 
-  final dartFiles = projectDir
-      .listSync(recursive: true)
-      .whereType<File>()
-      .where((f) => f.path.endsWith('.dart'))
-      .toList();
+  final dartFiles =
+      projectDir.listSync(recursive: true).whereType<File>().where((f) => f.path.endsWith('.dart')).toList();
 
   final usedPackages = <String>{};
   final allDependencies = {...deps, ...devDeps}.toList();
@@ -53,10 +50,8 @@ Future<bool> checkUnusedDependencies() async {
     }
   }
 
-  final unusedDeps = deps.where((d) => !usedPackages.contains(d)).toList()
-    ..sort();
-  final unusedDevDeps = devDeps.where((d) => !usedPackages.contains(d)).toList()
-    ..sort();
+  final unusedDeps = deps.where((d) => !usedPackages.contains(d)).toList()..sort();
+  final unusedDevDeps = devDeps.where((d) => !usedPackages.contains(d)).toList()..sort();
 
   if (unusedDeps.isEmpty && unusedDevDeps.isEmpty) {
     print('✅ All packages are used.');
@@ -124,8 +119,10 @@ Future<bool> checkUnusedWidgets() async {
     final content = await file.readAsString();
     allContent[file.path] = content;
 
+    final strippedContent = _stripComments(content);
+
     final classPattern = RegExp(r'class\s+(\w+)');
-    final matches = classPattern.allMatches(content);
+    final matches = classPattern.allMatches(strippedContent);
     for (final match in matches) {
       final className = match.group(1)!;
       if (!className.startsWith('_')) {
@@ -185,12 +182,18 @@ Future<bool> checkUnusedWidgets() async {
     print('⚠️  Unused classes (${unusedClasses.length}):');
     for (final className in unusedClasses) {
       final filePath = definedClasses[className]!;
-      final relativePath =
-          filePath.replaceFirst(projectDir.path, '').replaceFirst('/', '');
+      final relativePath = filePath.replaceFirst(projectDir.path, '').replaceFirst('/', '');
       print(' - $className ($relativePath)');
     }
     return false;
   }
+}
+
+/// Strips comments from the given code.
+String _stripComments(String code) {
+  final blockComments = RegExp(r'/\*[\s\S]*?\*/');
+  final lineComments = RegExp(r'//.*$', multiLine: true);
+  return code.replaceAll(blockComments, '').replaceAll(lineComments, '');
 }
 
 /// Scans keys from `.arb` files and reports keys not referenced in code via common l10n access patterns (e.g., `S.of(context).keyName`, `AppLocalizations.current.keyName`, `context.l10n.keyName`).
@@ -212,8 +215,7 @@ Future<bool> checkUnusedIntlKeys() async {
   for (final file in arbFiles) {
     try {
       final content = await file.readAsString();
-      final Map<String, dynamic> data =
-          jsonDecode(content) as Map<String, dynamic>;
+      final Map<String, dynamic> data = jsonDecode(content) as Map<String, dynamic>;
       for (final key in data.keys) {
         if (!key.startsWith('@')) {
           allKeys.add(key);
@@ -227,11 +229,8 @@ Future<bool> checkUnusedIntlKeys() async {
     return true;
   }
 
-  final dartFiles = projectDir
-      .listSync(recursive: true)
-      .whereType<File>()
-      .where((f) => f.path.endsWith('.dart'))
-      .where((f) {
+  final dartFiles =
+      projectDir.listSync(recursive: true).whereType<File>().where((f) => f.path.endsWith('.dart')).where((f) {
     final p = f.path;
     if (p.contains('/test/')) return false;
     if (p.contains('/.dart_tool/')) return false;
@@ -277,21 +276,6 @@ Future<bool> checkUnusedIntlKeys() async {
 
 /// Checks if a string looks like a regex pattern.
 bool _isRegexPattern(String s) {
-  final regexChars = [
-    '.*',
-    '^',
-    r'$',
-    '+',
-    '*',
-    '?',
-    '|',
-    '(',
-    ')',
-    '[',
-    ']',
-    '{',
-    '}',
-    '\\'
-  ];
+  final regexChars = ['.*', '^', r'$', '+', '*', '?', '|', '(', ')', '[', ']', '{', '}', '\\'];
   return regexChars.any((char) => s.contains(char));
 }
