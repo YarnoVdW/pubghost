@@ -15,26 +15,24 @@ Future<bool> checkUnusedDependencies() async {
   }
 
   final yaml = loadYaml(pubspecFile.readAsStringSync());
-  final deps = <String>[
-    ...?yaml['dependencies']?.keys,
-    ...?yaml['dev_dependencies']?.keys,
-  ];
+  final deps = <String>[...?yaml['dependencies']?.keys];
+  final devDeps = <String>[...?yaml['dev_dependencies']?.keys];
 
-  if (deps.isEmpty) {
+  if (deps.isEmpty && devDeps.isEmpty) {
     print('No dependencies found in pubspec.yaml.');
     return true;
   }
 
   final ignoredDeps = yaml[packageName]?['ignore_dependencies'];
 
+  final ignored = <String>{};
   if (ignoredDeps is YamlList) {
-    for (final ignored in ignoredDeps) {
-      if (ignored is String) {
-        deps.remove(ignored);
-      }
+    for (final item in ignoredDeps) {
+      if (item is String) ignored.add(item);
     }
-    deps.remove(packageName);
   }
+  deps.removeWhere((dep) => ignored.contains(dep));
+  devDeps.removeWhere((dep) => ignored.contains(dep));
 
   final dartFiles = projectDir
       .listSync(recursive: true)
@@ -43,10 +41,11 @@ Future<bool> checkUnusedDependencies() async {
       .toList();
 
   final usedPackages = <String>{};
+  final allDependencies = {...deps, ...devDeps}.toList();
 
   for (final file in dartFiles) {
     final content = await file.readAsString();
-    for (final dep in deps) {
+    for (final dep in allDependencies) {
       final importPattern = RegExp("import\\s+['\"]package:$dep/");
       if (importPattern.hasMatch(content)) {
         usedPackages.add(dep);
@@ -54,15 +53,26 @@ Future<bool> checkUnusedDependencies() async {
     }
   }
 
-  final unusedPackages = deps.where((d) => !usedPackages.contains(d)).toList();
+  final unusedDeps = deps.where((d) => !usedPackages.contains(d)).toList()
+    ..sort();
+  final unusedDevDeps = devDeps.where((d) => !usedPackages.contains(d)).toList()
+    ..sort();
 
-  if (unusedPackages.isEmpty) {
+  if (unusedDeps.isEmpty && unusedDevDeps.isEmpty) {
     print('✅ All packages are used.');
     return true;
   } else {
-    print('⚠️  Unused packages (${unusedPackages.length}):');
-    for (final dep in unusedPackages) {
-      print(' - $dep');
+    if (unusedDeps.isNotEmpty) {
+      print('⚠️  Unused dependencies (${unusedDeps.length}):');
+      for (final dep in unusedDeps) {
+        print(' - $dep');
+      }
+    }
+    if (unusedDevDeps.isNotEmpty) {
+      print('⚠️  Unused dev_dependencies (${unusedDevDeps.length}):');
+      for (final dep in unusedDevDeps) {
+        print(' - $dep');
+      }
     }
     return false;
   }
