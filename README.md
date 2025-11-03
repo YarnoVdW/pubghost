@@ -39,25 +39,35 @@ dart pub global activate pubghost
 Run via Dart:
 
 ```bash
-dart run pubghost --deps
-dart run pubghost --widgets
-dart run pubghost --intl
+dart run pubghost -d  # deps
+dart run pubghost -c  # classes/widgets
+dart run pubghost -t  # translations (arb)
+
+# You can chain flags:
+dart run pubghost -dc
+dart run pubghost -ct
+dart run pubghost -dct
 ```
 
 Or if globally activated:
 
 ```bash
-pubghost --deps
-pubghost --widgets
-pubghost --intl
+pubghost -d
+pubghost -c
+pubghost -t
+
+# You can chain flags:
+pubghost -dc
+pubghost -ct
+pubghost -dct
 ```
 
 ### Commands
 
-- `--deps`: Check for unused dependencies declared in `pubspec.yaml`.
+- `-d`: (--deps) Check for unused dependencies declared in `pubspec.yaml`.
 > See [Configuration and Conventions](#configuration-and-conventions) to ignore specific dependencies.
-- `--widgets`: Check for unused classes/widgets under your project `lib/` directory.
-- `--intl`: Check for `.arb` keys not referenced in your code. Generated l10n directories are excluded.
+- `-c`: (--widgets) Check for unused classes/widgets under your project `lib/` directory.
+- `-t`: (--intl) Check for `.arb` keys not referenced in your code. Generated l10n directories are excluded.
 
 ### Output
 
@@ -100,24 +110,12 @@ pubghost --intl
 > ```
 
 
-
-
 ## Limitations
 
 - Heuristic-based scanning may produce false positives/negatives in advanced scenarios:
   - Dynamically constructed imports/usages
   - Reflection or code generation outside the excluded folders
   - Intl keys used through non-standard access patterns
-
-## CI
-
-Add a simple CI job to keep your project tidy:
-
-```bash
-dart run pubghost --deps
-dart run pubghost --widgets
-dart run pubghost --intl
-```
 
 ---
 
