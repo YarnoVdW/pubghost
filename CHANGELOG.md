@@ -1,3 +1,8 @@
+## 1.0.8-beta.0
+ - Added support for json translations.
+ - Added args package for better cli.
+ - Ignore comments when scanning files.
+
 ## 1.0.7
 - Added the ability to chain arguments.
 - Added pattern-based ignoring for classes via `ignore_classes` in `pubspec.yaml` (supports exact matches and regex patterns).

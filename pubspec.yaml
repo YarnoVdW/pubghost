@@ -1,6 +1,6 @@
 name: pubghost
 description: A CLI tool to find unused translations, dependencies or classes in a Flutter project.
-version: 1.0.7
+version: 1.0.8-beta.0
 repository: https://github.com/YarnoVdW/pubghost
 homepage: https://github.com/YarnoVdW/pubghost
 
