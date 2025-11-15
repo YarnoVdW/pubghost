@@ -205,7 +205,7 @@ Future<bool> checkUnusedIntlKeys() async {
 
   if (pubspecFile.existsSync()) {
     final yaml = loadYaml(pubspecFile.readAsStringSync());
-    jsonPath = yaml[packageName]?['json_path'] as String?;
+    jsonPath = yaml[packageName]?['json_intl_path'] as String?;
   }
 
   final arbFiles = Directory('${projectDir.path}/lib')
