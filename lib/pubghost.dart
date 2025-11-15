@@ -34,8 +34,11 @@ Future<bool> checkUnusedDependencies() async {
   deps.removeWhere((dep) => ignored.contains(dep));
   devDeps.removeWhere((dep) => ignored.contains(dep));
 
-  final dartFiles =
-      projectDir.listSync(recursive: true).whereType<File>().where((f) => f.path.endsWith('.dart')).toList();
+  final dartFiles = projectDir
+      .listSync(recursive: true)
+      .whereType<File>()
+      .where((f) => f.path.endsWith('.dart'))
+      .toList();
 
   final usedPackages = <String>{};
   final allDependencies = {...deps, ...devDeps}.toList();
@@ -50,8 +53,10 @@ Future<bool> checkUnusedDependencies() async {
     }
   }
 
-  final unusedDeps = deps.where((d) => !usedPackages.contains(d)).toList()..sort();
-  final unusedDevDeps = devDeps.where((d) => !usedPackages.contains(d)).toList()..sort();
+  final unusedDeps = deps.where((d) => !usedPackages.contains(d)).toList()
+    ..sort();
+  final unusedDevDeps = devDeps.where((d) => !usedPackages.contains(d)).toList()
+    ..sort();
 
   if (unusedDeps.isEmpty && unusedDevDeps.isEmpty) {
     print('✅ All packages are used.');
@@ -182,7 +187,8 @@ Future<bool> checkUnusedWidgets() async {
     print('⚠️  Unused classes (${unusedClasses.length}):');
     for (final className in unusedClasses) {
       final filePath = definedClasses[className]!;
-      final relativePath = filePath.replaceFirst(projectDir.path, '').replaceFirst('/', '');
+      final relativePath =
+          filePath.replaceFirst(projectDir.path, '').replaceFirst('/', '');
       print(' - $className ($relativePath)');
     }
     return false;
@@ -207,7 +213,8 @@ Future<bool> checkUnusedIntlKeys() async {
   if (pubspecFile.existsSync()) {
     final yaml = loadYaml(pubspecFile.readAsStringSync());
     jsonPath = yaml[packageName]?['json_intl_path'] as String?;
-    jsonTranslationAccessor = yaml[packageName]?['translation_accessor'] as String?;
+    jsonTranslationAccessor =
+        yaml[packageName]?['translation_accessor'] as String?;
   }
 
   final arbFiles = Directory('${projectDir.path}/lib')
@@ -218,10 +225,14 @@ Future<bool> checkUnusedIntlKeys() async {
 
   final jsonFiles = [];
   if (jsonPath != null) {
-    final jsonDir = Directory(jsonPath.startsWith('/') ? jsonPath : '${projectDir.path}/$jsonPath');
+    final jsonDir = Directory(
+        jsonPath.startsWith('/') ? jsonPath : '${projectDir.path}/$jsonPath');
     if (jsonDir.existsSync()) {
-      jsonFiles
-          .addAll(jsonDir.listSync(recursive: true).whereType<File>().where((f) => f.path.endsWith('.json')).toList());
+      jsonFiles.addAll(jsonDir
+          .listSync(recursive: true)
+          .whereType<File>()
+          .where((f) => f.path.endsWith('.json'))
+          .toList());
     }
   }
 
@@ -239,7 +250,8 @@ Future<bool> checkUnusedIntlKeys() async {
   for (final file in arbFiles) {
     try {
       final content = await file.readAsString();
-      final Map<String, dynamic> data = jsonDecode(content) as Map<String, dynamic>;
+      final Map<String, dynamic> data =
+          jsonDecode(content) as Map<String, dynamic>;
       for (final key in data.keys) {
         if (!key.startsWith('@')) {
           allKeys.add(key);
@@ -251,7 +263,8 @@ Future<bool> checkUnusedIntlKeys() async {
   for (final file in jsonFiles) {
     try {
       final content = await file.readAsString();
-      final Map<String, dynamic> data = jsonDecode(content) as Map<String, dynamic>;
+      final Map<String, dynamic> data =
+          jsonDecode(content) as Map<String, dynamic>;
       _extractKeysFromJson(data, allKeys);
     } catch (_) {}
   }
@@ -261,8 +274,11 @@ Future<bool> checkUnusedIntlKeys() async {
     return true;
   }
 
-  final dartFiles =
-      projectDir.listSync(recursive: true).whereType<File>().where((f) => f.path.endsWith('.dart')).where((f) {
+  final dartFiles = projectDir
+      .listSync(recursive: true)
+      .whereType<File>()
+      .where((f) => f.path.endsWith('.dart'))
+      .where((f) {
     final p = f.path;
     if (p.contains('/test/')) return false;
     if (p.contains('/.dart_tool/')) return false;
@@ -289,7 +305,8 @@ Future<bool> checkUnusedIntlKeys() async {
   for (final key in allKeys) {
     final escapedKey = RegExp.escape(key);
     final patterns = [
-      RegExp('["\']$escapedKey["\']\\.tr|["\']$escapedKey["\']\\.$jsonTranslationAccessor'),
+      RegExp(
+          '["\']$escapedKey["\']\\.tr|["\']$escapedKey["\']\\.$jsonTranslationAccessor'),
       RegExp('\\.$escapedKey(\\b|\\()'),
       RegExp('\\b(tr|translations|$jsonTranslationAccessor)\\.$escapedKey\\b'),
       RegExp('(translate|$jsonTranslationAccessor)\\(["\']$escapedKey["\']\\)'),
@@ -321,11 +338,27 @@ Future<bool> checkUnusedIntlKeys() async {
 
 /// Checks if a string looks like a regex pattern.
 bool _isRegexPattern(String s) {
-  final regexChars = ['.*', '^', r'$', '+', '*', '?', '|', '(', ')', '[', ']', '{', '}', '\\'];
+  final regexChars = [
+    '.*',
+    '^',
+    r'$',
+    '+',
+    '*',
+    '?',
+    '|',
+    '(',
+    ')',
+    '[',
+    ']',
+    '{',
+    '}',
+    '\\'
+  ];
   return regexChars.any((char) => s.contains(char));
 }
 
-void _extractKeysFromJson(Map<String, dynamic> json, Set<String> keys, {String prefix = ''}) {
+void _extractKeysFromJson(Map<String, dynamic> json, Set<String> keys,
+    {String prefix = ''}) {
   for (final entry in json.entries) {
     final key = entry.key;
     final value = entry.value;
