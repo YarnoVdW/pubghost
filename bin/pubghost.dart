@@ -4,10 +4,16 @@ import 'package:pubghost/pubghost.dart' as pubghost;
 
 void main(List<String> arguments) async {
   final parser = ArgParser()
-    ..addFlag('deps', abbr: 'd', negatable: false, help: 'Check for unused dependencies')
-    ..addFlag('widgets', abbr: 'c', negatable: false, help: 'Check for unused classes/widgets')
-    ..addFlag('intl', abbr: 't', negatable: false, help: 'Check ARB intl keys not used in code')
-    ..addFlag('help', abbr: 'h', negatable: false, help: 'Show usage information');
+    ..addFlag('deps',
+        abbr: 'd', negatable: false, help: 'Check for unused dependencies')
+    ..addFlag('widgets',
+        abbr: 'c', negatable: false, help: 'Check for unused classes/widgets')
+    ..addFlag('intl',
+        abbr: 't',
+        negatable: false,
+        help: 'Check ARB intl keys not used in code')
+    ..addFlag('help',
+        abbr: 'h', negatable: false, help: 'Show usage information');
 
   ArgResults argResults;
   try {
