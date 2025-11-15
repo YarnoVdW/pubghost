@@ -199,6 +199,14 @@ String _stripComments(String code) {
 /// Scans keys from `.arb` files and reports keys not referenced in code via common l10n access patterns (e.g., `S.of(context).keyName`, `AppLocalizations.current.keyName`, `context.l10n.keyName`).
 Future<bool> checkUnusedIntlKeys() async {
   final projectDir = Directory.current;
+  final pubspecFile = File('${projectDir.path}/pubspec.yaml');
+
+  String? jsonPath;
+
+  if (pubspecFile.existsSync()) {
+    final yaml = loadYaml(pubspecFile.readAsStringSync());
+    jsonPath = yaml[packageName]?['json_path'] as String?;
+  }
 
   final arbFiles = Directory('${projectDir.path}/lib')
       .listSync(recursive: true)
@@ -206,8 +214,22 @@ Future<bool> checkUnusedIntlKeys() async {
       .where((f) => f.path.endsWith('.arb'))
       .toList();
 
-  if (arbFiles.isEmpty) {
-    print('No .arb files found. Skipping intl key check.');
+  final jsonFiles = [];
+  if (jsonPath != null) {
+    final jsonDir = Directory(jsonPath.startsWith('/') ? jsonPath : '${projectDir.path}/$jsonPath');
+    if (jsonDir.existsSync()) {
+      jsonFiles
+          .addAll(jsonDir.listSync(recursive: true).whereType<File>().where((f) => f.path.endsWith('.json')).toList());
+    }
+  }
+
+  if (arbFiles.isEmpty && jsonPath == null) {
+    print('No translation files found. Skipping intl key check.');
+    return true;
+  }
+
+  if (jsonFiles.isEmpty && jsonPath != null) {
+    print('No JSON files found. Skipping intl key check.');
     return true;
   }
 
@@ -224,8 +246,16 @@ Future<bool> checkUnusedIntlKeys() async {
     } catch (_) {}
   }
 
+  for (final file in jsonFiles) {
+    try {
+      final content = await file.readAsString();
+      final Map<String, dynamic> data = jsonDecode(content) as Map<String, dynamic>;
+      _extractKeysFromJson(data, allKeys);
+    } catch (_) {}
+  }
+
   if (allKeys.isEmpty) {
-    print('No intl keys found in ARB files.');
+    print('No intl keys found in ARB or JSON files.');
     return true;
   }
 
@@ -256,8 +286,21 @@ Future<bool> checkUnusedIntlKeys() async {
   final unusedTranslations = <String>[];
   for (final key in allKeys) {
     final escapedKey = RegExp.escape(key);
-    final pattern = RegExp('\\.$escapedKey(\\b|\\()');
-    if (!pattern.hasMatch(code)) {
+    final patterns = [
+      RegExp("['\"]$escapedKey['\"]"),
+      RegExp("\\b$escapedKey\\b"),
+      RegExp("\\.$escapedKey(\\b|\\()"),
+      RegExp("\\[$escapedKey\\]"),
+    ];
+    var used = false;
+    for (final pattern in patterns) {
+      if (pattern.hasMatch(code)) {
+        used = true;
+        break;
+      }
+    }
+
+    if (!used) {
       unusedTranslations.add(key);
     }
   }
@@ -278,4 +321,26 @@ Future<bool> checkUnusedIntlKeys() async {
 bool _isRegexPattern(String s) {
   final regexChars = ['.*', '^', r'$', '+', '*', '?', '|', '(', ')', '[', ']', '{', '}', '\\'];
   return regexChars.any((char) => s.contains(char));
+}
+
+void _extractKeysFromJson(Map<String, dynamic> json, Set<String> keys, {String prefix = ''}) {
+  for (final entry in json.entries) {
+    final key = entry.key;
+    final value = entry.value;
+
+    if (key.startsWith('@')) continue;
+
+    final fullKey = prefix.isEmpty ? key : '$prefix.$key';
+
+    if (value is Map<String, dynamic>) {
+      _extractKeysFromJson(value, keys, prefix: fullKey);
+
+      final allChildrenAreStrings = value.values.every((v) => v is String);
+      if (allChildrenAreStrings && value.isNotEmpty) {
+        keys.add(fullKey);
+      }
+    } else if (value is String) {
+      keys.add(fullKey);
+    }
+  }
 }
