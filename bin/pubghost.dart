@@ -1,92 +1,35 @@
-import 'package:pubghost/pubghost.dart' as pubghost;
 import 'dart:io';
+import 'package:args/args.dart';
+import 'package:pubghost/pubghost.dart' as pubghost;
 
 void main(List<String> arguments) async {
-  if (arguments.isEmpty) {
-    print('Usage: pubghost <command>');
-    print('Commands:');
-    print('  -d, --deps      Check for unused dependencies');
-    print('  -c, --widgets   Check for unused classes/widgets');
-    print('  -t, --intl      Check ARB intl keys not used in code');
-    print('');
-    print('Flags can be chained: -dc, -cdt, etc.');
+  final parser = ArgParser()
+    ..addFlag('deps', abbr: 'd', negatable: false, help: 'Check for unused dependencies')
+    ..addFlag('widgets', abbr: 'c', negatable: false, help: 'Check for unused classes/widgets')
+    ..addFlag('intl', abbr: 't', negatable: false, help: 'Check ARB intl keys not used in code')
+    ..addFlag('help', abbr: 'h', negatable: false, help: 'Show usage information');
+
+  ArgResults argResults;
+  try {
+    argResults = parser.parse(arguments);
+  } catch (e) {
+    print('Error: $e\n');
+    printUsage(parser);
     exit(1);
   }
 
-  final command = arguments.first;
-
-  final checks = <String>[];
-  bool hasError = false;
-
-  if (command.startsWith('-') && !command.startsWith('--')) {
-    for (int i = 1; i < command.length; i++) {
-      final char = command[i];
-      switch (char) {
-        case 'd':
-          checks.add('deps');
-          break;
-        case 'c':
-          checks.add('widgets');
-          break;
-        case 't':
-          checks.add('intl');
-          break;
-        default:
-          print('Unknown flag: -$char');
-          hasError = true;
-          break;
-      }
-    }
-  } else {
-    bool isDeprecated = false;
-
-    switch (command) {
-      case '-d':
-        checks.add('deps');
-        break;
-      case '-c':
-        checks.add('widgets');
-        break;
-      case '-t':
-        checks.add('intl');
-        break;
-      case '--deps':
-        checks.add('deps');
-        isDeprecated = true;
-        break;
-      case '--widgets':
-        checks.add('widgets');
-        isDeprecated = true;
-        break;
-      case '--intl':
-        checks.add('intl');
-        isDeprecated = true;
-        break;
-      default:
-        print('Unknown command: $command');
-        print('Usage: pubghost <command>');
-        print('Commands:');
-        print('  -d, --deps      Check for unused dependencies');
-        print('  -c, --widgets   Check for unused classes/widgets');
-        print('  -t, --intl      Check ARB intl keys not used in code');
-        print('');
-        print('Flags can be chained: -dc, -cdt, etc.');
-    }
-
-    if (isDeprecated) {
-      stderr.writeln(
-          '⚠️  Warning: $command is going to be deprecated in the future. Use ${command == "--deps" ? "-d" : command == "--widgets" ? "-c" : "-t"} instead.');
-    }
+  if (argResults['help'] as bool || argResults.arguments.isEmpty) {
+    printUsage(parser);
+    exit(0);
   }
 
-  if (hasError || checks.isEmpty) {
-    print('Usage: pubghost <command>');
-    print('Commands:');
-    print('  -d, --deps      Check for unused dependencies');
-    print('  -c, --widgets   Check for unused classes/widgets');
-    print('  -t, --intl      Check ARB intl keys not used in code');
-    print('');
-    print('Flags can be chained: -dc, -cdt, etc.');
+  final checks = <String>[];
+  if (argResults['deps'] as bool) checks.add('deps');
+  if (argResults['widgets'] as bool) checks.add('widgets');
+  if (argResults['intl'] as bool) checks.add('intl');
+
+  if (checks.isEmpty) {
+    printUsage(parser);
     exit(1);
   }
 
@@ -106,14 +49,15 @@ void main(List<String> arguments) async {
         break;
     }
 
-    if (!passed) {
-      allPassed = false;
-    }
+    if (!passed) allPassed = false;
 
-    if (checks.length > 1 && check != checks.last) {
-      print('');
-    }
+    if (checks.length > 1 && check != checks.last) print('');
   }
 
   exit(allPassed ? 0 : 1);
+}
+
+void printUsage(ArgParser parser) {
+  print('Usage: pubghost [options]');
+  print(parser.usage);
 }
