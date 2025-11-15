@@ -11,7 +11,7 @@ Fast, lightweight CLI you can run locally or in CI.
 
 - **-d**: (--deps) Scans `lib/` imports to find dependencies declared in `pubspec.yaml` but never imported.
 - **-c**: (--widgets) Finds classes defined in your app and reports ones never referenced anywhere else.
-- **-t**: (--intl) Parses `.arb` (or `.json` translations when json_intl_path is specified in pubspec.yaml) files and reports keys not used in code via common localization access like `S.of(context).keyName`, `AppLocalizations.current.keyName`, or `context.l10n.keyName`. Generated l10n sources are ignored.
+- **-t**: (--intl) Parses `.arb` (or `.json` translations when json_intl_path is specified in pubspec.yaml) files and reports keys not used in code via common localization access like `S.of(context).keyName`, `AppLocalizations.current.keyName`, `context.l10n.keyName`, or `'keyName'.tr`. Generated l10n sources are ignored.
 
 ## Installation
 
@@ -103,11 +103,18 @@ pubghost -dct
 >   ignore_dependencies:
 >     - flutter_launcher_icons
 >   ignore_classes:
->     - ExactClassName           # Exact class name match
->     - ".*Model$"               # Regex pattern: classes ending in "Model"
->     - "^MyPrefix.*"            # Regex pattern: classes starting with "MyPrefix"
->   # Optional: path to JSON translations for --intl checks
->   json_intl_path: lib/l10n/json
+>     - ExactClassName              # Exact class name match
+>     - ".*Model$"                  # Regex pattern: classes ending in "Model"
+>     - "^MyPrefix.*"               # Regex pattern: classes starting with "MyPrefix"
+> ```
+
+### JSON translations:
+- When your project uses JSON translations, it is mandatory to add the json_intl_path option in pubspec.yaml.
+- It is also possible to specify a translation_accessor.
+> ```yaml
+> pubghost:
+>   json_intl_path: lib/l10n/json   # Path to JSON translations for --intl checks.
+>   translation_accessor: tr        # Optional: Accessor to use for translation scanning.
 > ```
 
 
