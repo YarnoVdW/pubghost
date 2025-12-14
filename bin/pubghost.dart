@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:args/args.dart';
 import 'package:pubghost/pubghost.dart' as pubghost;
+import 'package:pubghost/spinner.dart';
 
 void main(List<String> arguments) async {
   final parser = ArgParser()
@@ -45,13 +46,23 @@ void main(List<String> arguments) async {
     bool passed = false;
     switch (check) {
       case 'deps':
+        final spinner = Spinner('Checking unused dependencies...');
+        spinner.start();
         passed = await pubghost.checkUnusedDependencies();
+        spinner.stop();
+
         break;
       case 'widgets':
+        final spinner = Spinner('Checking unused classes...');
+        spinner.start();
         passed = await pubghost.checkUnusedWidgets();
+        spinner.stop();
         break;
       case 'intl':
+        final spinner = Spinner('Checking unused translations...');
+        spinner.start();
         passed = await pubghost.checkUnusedIntlKeys();
+        spinner.stop();
         break;
     }
 
