@@ -1,3 +1,7 @@
+## 1.1.0
+ - Fixed a bug where Json keys where wrongfully detected.
+ - Added line numbers to output.
+
 ## 1.0.8-beta.0
  - Added support for json translations.
  - Added args package for better cli.
