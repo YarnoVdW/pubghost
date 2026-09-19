@@ -1,0 +1,5 @@
+# The checkUnused* functions under test operate on `Directory.current`, which
+# is a single mutable OS-process resource shared across every test isolate.
+# Running suites concurrently races changes to it (see issue reproduction in
+# test/), so tests must run serially.
+concurrency: 1
