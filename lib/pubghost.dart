@@ -301,7 +301,7 @@ Future<bool> checkUnusedIntlKeys() async {
   }
   final code = buffer.toString();
 
-  final unusedTranslations = <String>[];
+  final usedKeys = <String>{};
   for (final key in allKeys) {
     final escapedKey = RegExp.escape(key);
     final patterns = [
@@ -311,18 +311,26 @@ Future<bool> checkUnusedIntlKeys() async {
       RegExp('\\b(tr|translations|$jsonTranslationAccessor)\\.$escapedKey\\b'),
       RegExp('(translate|$jsonTranslationAccessor)\\(["\']$escapedKey["\']\\)'),
     ];
-    var used = false;
     for (final pattern in patterns) {
       if (pattern.hasMatch(code)) {
-        used = true;
+        usedKeys.add(key);
         break;
       }
     }
+  }
 
-    if (!used) {
-      unusedTranslations.add(key);
+  for (final key in allKeys) {
+    if (usedKeys.contains(key)) continue;
+    final childPrefix = '$key.';
+    final hasUsedChild = allKeys.any(
+        (other) => other.startsWith(childPrefix) && usedKeys.contains(other));
+    if (hasUsedChild) {
+      usedKeys.add(key);
     }
   }
+
+  final unusedTranslations =
+      allKeys.where((key) => !usedKeys.contains(key)).toList();
 
   if (unusedTranslations.isEmpty) {
     print('✅ All intl keys are used.');
