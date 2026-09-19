@@ -34,7 +34,8 @@ void main() {
 
     test('ignores keys only seen in generated l10n output', () async {
       await project.writePubspec('name: sample');
-      await project.writeFile('lib/l10n/app_en.arb', '{"onlyInGenerated": "x"}');
+      await project.writeFile(
+          'lib/l10n/app_en.arb', '{"onlyInGenerated": "x"}');
       await project.writeFile(
         'lib/l10n/generated/app_localizations.dart',
         'String get onlyInGenerated => "x";',
@@ -66,7 +67,8 @@ pubghost:
   "farewell": "Bye"
 }
 ''');
-      await project.writeFile('lib/main.dart', "void main() { 'greeting'.tr(); }");
+      await project.writeFile(
+          'lib/main.dart', "void main() { 'greeting'.tr(); }");
 
       final run = await runInProject(project, checkUnusedIntlKeys);
 
@@ -147,7 +149,8 @@ pubghost:
   translation_accessor: t
 ''');
       await project.writeFile('lib/l10n/json/en.json', '{"greeting": "Hello"}');
-      await project.writeFile('lib/main.dart', "void main() { 'greeting'.t(); }");
+      await project.writeFile(
+          'lib/main.dart', "void main() { 'greeting'.t(); }");
 
       final run = await runInProject(project, checkUnusedIntlKeys);
 
@@ -162,7 +165,8 @@ pubghost:
 ''');
       await project.writeFile('lib/l10n/json/en.json', '{"greeting": "Hello"}');
       await project.writeFile('lib/main.dart', 'void main() {}');
-      await project.writeFile('test/widget_test.dart', "void main() { 'greeting'.tr(); }");
+      await project.writeFile(
+          'test/widget_test.dart', "void main() { 'greeting'.tr(); }");
 
       final run = await runInProject(project, checkUnusedIntlKeys);
 

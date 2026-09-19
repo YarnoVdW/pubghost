@@ -21,7 +21,8 @@ class TestProject {
     return file.writeAsString(contents);
   }
 
-  Future<void> writePubspec(String contents) => writeFile('pubspec.yaml', contents);
+  Future<void> writePubspec(String contents) =>
+      writeFile('pubspec.yaml', contents);
 
   Future<void> dispose() async {
     if (await root.exists()) {
