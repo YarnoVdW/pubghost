@@ -24,7 +24,9 @@ void main() {
       final run = await runInProject(project, checkUnusedWidgets);
 
       expect(run.result, isFalse);
-      expect(run.output.join('\n'), contains('OrphanWidget'));
+      // OrphanWidget is declared on line 2, column 7 ("class " is 6 chars).
+      expect(
+          run.output.join('\n'), contains('OrphanWidget (lib/main.dart:2:7)'));
       expect(run.output.join('\n'), isNot(contains('UsedWidget')));
     });
 
@@ -46,6 +48,25 @@ void main() {
       final run = await runInProject(project, checkUnusedWidgets);
 
       expect(run.result, isTrue);
+    });
+
+    test('reports the correct line after a multi-line block comment', () async {
+      await project.writePubspec('name: sample');
+      await project.writeFile('lib/main.dart', '''
+/*
+ * A block comment
+ * that spans several lines.
+ */
+class OrphanWidget {}
+
+void main() {}
+''');
+
+      final run = await runInProject(project, checkUnusedWidgets);
+
+      expect(run.result, isFalse);
+      expect(
+          run.output.join('\n'), contains('OrphanWidget (lib/main.dart:5:7)'));
     });
 
     test('respects exact and regex ignore_classes config', () async {

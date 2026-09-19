@@ -83,7 +83,7 @@ pubghost -dct
 ## How it works
 
 - **Unused dependencies**: Looks for `import 'package:<dep>/...'` in your `lib/` Dart files. Any dependency in `pubspec.yaml` without a matching import is reported.
-- **Unused widgets**: Lists classes defined in `lib/`, then searches combined project code (excluding tests) for references such as usage, generics, inheritance, mixins, and constructor calls.
+- **Unused widgets**: Lists classes defined in `lib/`, then searches combined project code (excluding tests) for references such as usage, generics, inheritance, mixins, and constructor calls. Reported classes include their file, line, and column (`path/to/file.dart:12:7`) so you can jump straight to the declaration.
 - **Unused intl**: Reads `.arb` files or `json` translations (if json_intl_path is specified in pubspec.yaml), collects keys, then scans your code (excluding tests and generated l10n folders) for `.keyName` occurrences next to a localization object. Keys seen only in generated sources are not counted as “used.”
 
 ## Configuration and Conventions

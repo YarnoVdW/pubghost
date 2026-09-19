@@ -117,7 +117,7 @@ Future<bool> checkUnusedWidgets() async {
       .where((f) => f.path.endsWith('.dart'))
       .toList();
 
-  final definedClasses = <String, String>{};
+  final definedClasses = <String, ({String filePath, int line, int column})>{};
   final allContent = <String, String>{};
 
   for (final file in dartFiles) {
@@ -131,7 +131,13 @@ Future<bool> checkUnusedWidgets() async {
     for (final match in matches) {
       final className = match.group(1)!;
       if (!className.startsWith('_')) {
-        definedClasses[className] = file.path;
+        final nameStart = match.start + match.group(0)!.indexOf(className);
+        final lineStart = strippedContent.lastIndexOf('\n', nameStart) + 1;
+        final line =
+            '\n'.allMatches(strippedContent.substring(0, nameStart)).length + 1;
+        final column = nameStart - lineStart + 1;
+        definedClasses[className] =
+            (filePath: file.path, line: line, column: column);
       }
     }
   }
@@ -186,20 +192,28 @@ Future<bool> checkUnusedWidgets() async {
   } else {
     print('⚠️  Unused classes (${unusedClasses.length}):');
     for (final className in unusedClasses) {
-      final filePath = definedClasses[className]!;
-      final relativePath =
-          filePath.replaceFirst(projectDir.path, '').replaceFirst('/', '');
-      print(' - $className ($relativePath)');
+      final location = definedClasses[className]!;
+      final relativePath = location.filePath
+          .replaceFirst(projectDir.path, '')
+          .replaceFirst('/', '');
+      print(
+          ' - $className ($relativePath:${location.line}:${location.column})');
     }
     return false;
   }
 }
 
-/// Strips comments from the given code.
+/// Strips comments from the given code, preserving line breaks inside
+/// removed block comments so line numbers of the remaining code stay
+/// accurate.
 String _stripComments(String code) {
   final blockComments = RegExp(r'/\*[\s\S]*?\*/');
   final lineComments = RegExp(r'//.*$', multiLine: true);
-  return code.replaceAll(blockComments, '').replaceAll(lineComments, '');
+  final withoutBlockComments = code.replaceAllMapped(
+    blockComments,
+    (match) => '\n' * '\n'.allMatches(match.group(0)!).length,
+  );
+  return withoutBlockComments.replaceAll(lineComments, '');
 }
 
 /// Scans keys from `.arb` files and reports keys not referenced in code via common l10n access patterns (e.g., `S.of(context).keyName`, `AppLocalizations.current.keyName`, `context.l10n.keyName`).
